@@ -27,8 +27,11 @@ export default function GeneratePage() {
       }
       const data = await res.json();
       setImageUrl(data.imageUrl);
-    } catch (err: any) {
-      setError(err.message || "Unknown error");
+    } catch (err: unknown) {
+      // avoid explicit `any` to satisfy eslint rule; extract message safely
+      const message =
+        err instanceof Error ? err.message : String(err ?? "Unknown error");
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -52,17 +55,17 @@ export default function GeneratePage() {
   };
 
   return (
-    <div className="bg-gradient-to-r from-fuchsia-500 to-violet-600 h-dvh">
+    <div className="bg-white h-dvh text-black">
       <p>Describe the image you want to generate</p>
       <textarea
         placeholder="A futuristic city at sunset with flying cars..."
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
-        className="min-h-[200px] bg-background"
+        className="min-h-[100px] bg-gray-100 p-2 rounded mt-2 w-full"
       ></textarea>
       <button
         onClick={generateImage}
-        className="btn btn-primary bg-black"
+        className="btn btn-primary"
         disabled={loading}
       >
         {loading ? "Generating..." : "Generate Image"}
@@ -77,7 +80,7 @@ export default function GeneratePage() {
             height={200}
             className="rounded shadow-lg"
           />
-          <button onClick={downloadImage} className="btn btn-primary bg-black">
+          <button onClick={downloadImage} className="btn btn-primary">
             Download
           </button>
         </div>

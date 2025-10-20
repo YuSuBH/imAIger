@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
-import aiRoutes from "./routes/aiRoutes.js";
+import generateRoute from "./routes/generate.js";
+import analyzeRoute from "./routes/analyze.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -12,7 +13,8 @@ app.get("/", (req, res) => {
   res.send("Hello from Express server!");
 });
 
-app.use("/", aiRoutes);
+app.use("/generate", generateRoute);
+app.use("/analyze", analyzeRoute);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

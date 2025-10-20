@@ -2,8 +2,7 @@ import express from "express";
 
 const router = express.Router();
 
-// POST /generate-image
-router.post("/generate", async (req, res) => {
+router.post("/", async (req, res) => {
   const { prompt } = req.body;
   if (!prompt) {
     return res.status(400).json({ error: "Prompt is required" });

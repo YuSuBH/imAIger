@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function Navbar() {
   return (
-    <nav className="sticky top-0 z-50 bg-gradient-to-br from-[#199FD7] via-[#99BD3C] to-[#FC7942] shadow-md py-4 border-b border-t-gray-200 ">
+    <nav className="sticky top-0 z-50 bg-white shadow-md py-4 border-b border-t-gray-200 ">
       <div className="container mx-auto flex justify-between items-center px-6 lg:px-8">
         <Link href={"/"} className="flex items-center">
           {/* <Image src={"/logo.png"} alt="logo" width={50} height={50} /> */}

@@ -12,9 +12,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google/genai": "^1.25.0",
+    "@huggingface/inference": "^4.11.3",
     "axios": "^1.12.2",
     "cors": "^2.8.5",
     "express": "^5.1.0",
-    "multer": "^2.0.2"
+    "multer": "^2.0.2",
+    "openai": "^4.104.0",
+    "sharp": "^0.34.4"
   }
 }
