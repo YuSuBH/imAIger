@@ -1,12 +1,16 @@
 import express from "express";
 import multer from "multer";
+import sharp from "sharp";
 import { GoogleGenAI } from "@google/genai";
 
 const router = express.Router();
 
-// Configure multer to store files in memory
+// Configure multer to store files in memory with size limit
 const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+});
 
 // Initialize Google AI
 const ai = new GoogleGenAI({
@@ -23,14 +27,24 @@ router.post("/", upload.single("image"), async (req, res) => {
     // Get the query from the request body (optional)
     const query = req.body.query || "Describe this image in detail.";
 
-    // Convert buffer to base64
-    const base64Image = req.file.buffer.toString("base64");
+    // Optimize image: resize and compress
+    // Max dimensions: 1024x1024, JPEG quality: 80%
+    const optimizedImageBuffer = await sharp(req.file.buffer)
+      .resize(1024, 1024, {
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .jpeg({ quality: 80 })
+      .toBuffer();
+
+    // Convert optimized buffer to base64
+    const base64Image = optimizedImageBuffer.toString("base64");
 
     // Prepare contents for the API
     const contents = [
       {
         inlineData: {
-          mimeType: req.file.mimetype,
+          mimeType: "image/jpeg",
           data: base64Image,
         },
       },
