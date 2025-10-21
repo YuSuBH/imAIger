@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import VoiceInput from "@/components/VoiceInput";
 
 export default function GeneratePage() {
   const [prompt, setPrompt] = useState("");
@@ -67,12 +68,18 @@ export default function GeneratePage() {
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Prompt
           </label>
-          <textarea
-            placeholder="A futuristic city at sunset with flying cars..."
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            className="w-full min-h-[140px] p-3 border border-gray-200 rounded resize-vertical focus:outline-none focus:ring-2 focus:ring-indigo-200"
-          ></textarea>
+          <div className="flex gap-2">
+            <textarea
+              placeholder="A futuristic city at sunset with flying cars..."
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              className="flex-1 min-h-[140px] p-3 border border-gray-200 rounded resize-vertical focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            ></textarea>
+            <VoiceInput
+              onTranscript={(text) => setPrompt((prev) => prev + " " + text)}
+              disabled={loading}
+            />
+          </div>
 
           <div className="mt-4 flex items-center gap-3">
             <button

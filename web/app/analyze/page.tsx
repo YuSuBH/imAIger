@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import VoiceInput from "@/components/VoiceInput";
 
 export default function AnalyzePage() {
   const [selectedImage, setSelectedImage] = useState<string>("");
@@ -92,12 +93,20 @@ export default function AnalyzePage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Prompt (optional)
                 </label>
-                <textarea
-                  placeholder="What you want from the image? Describe here..."
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  className="w-full min-h-[120px] p-3 border border-gray-200 rounded resize-vertical focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                ></textarea>
+                <div className="flex gap-2">
+                  <textarea
+                    placeholder="What you want from the image? Describe here..."
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    className="flex-1 min-h-[120px] p-3 border border-gray-200 rounded resize-vertical focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                  ></textarea>
+                  <VoiceInput
+                    onTranscript={(text) =>
+                      setQuery((prev) => prev + " " + text)
+                    }
+                    disabled={loading}
+                  />
+                </div>
               </div>
 
               <div className="mt-4">
