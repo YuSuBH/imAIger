@@ -19,11 +19,14 @@ export default function Navbar() {
           >
             Generate
           </Link>
-          <Link href={"/enhance"} className="text-slate-900 hover:text-sky-500">
-            Enhance
+          <Link href={"/upscale"} className="text-slate-900 hover:text-sky-500">
+            UpScale
           </Link>
-          <Link href={"/nlp"} className="text-slate-900 hover:text-sky-500">
-            NLP
+          <Link
+            href={"/bgRemove"}
+            className="text-slate-900 hover:text-sky-500"
+          >
+            Remove BG
           </Link>
         </div>
       </div>

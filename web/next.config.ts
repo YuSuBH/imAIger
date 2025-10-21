@@ -3,7 +3,21 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   images: {
-    domains: ["tse1.mm.bing.net", "image.pollinations.ai"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "tse1.mm.bing.net",
+      },
+      {
+        protocol: "https",
+        hostname: "image.pollinations.ai",
+      },
+      {
+        protocol: "https",
+        hostname: "ik.imagekit.io",
+      },
+    ],
+    unoptimized: true, // For blob URLs and dynamic content
   },
 };
 

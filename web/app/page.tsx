@@ -1,8 +1,6 @@
 import Analyze from "@/components/Analyze";
-import Enhance from "@/components/Enhance";
 import Generate from "@/components/Generate";
 import Main from "@/components/Main";
-import Nlp from "@/components/Nlp";
 
 export default function Home() {
   return (
@@ -10,8 +8,6 @@ export default function Home() {
       <Main />
       <Analyze />
       <Generate />
-      <Enhance />
-      <Nlp />
     </>
   );
 }
