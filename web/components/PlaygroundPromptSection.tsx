@@ -38,25 +38,16 @@ export default function PlaygroundPromptSection({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      {/* Instruction Text or Options */}
-      <div className="mb-4">
-        {!hasImage ? (
-          <p className="text-sm text-gray-600 italic">
-            Describe the image you want to generate...
-          </p>
-        ) : (
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-gray-600">
-              Choose an action or describe what you want:
-            </p>
-            <PlaygroundActionButtons
-              selectedOption={selectedOption}
-              onOptionSelect={onOptionSelect}
-            />
-          </div>
-        )}
-      </div>
+    <div className="rounded-lg shadow-md p-6">
+      {/* Action Buttons - only show when image exists */}
+      {hasImage && (
+        <div className="mb-4 flex justify-end">
+          <PlaygroundActionButtons
+            selectedOption={selectedOption}
+            onOptionSelect={onOptionSelect}
+          />
+        </div>
+      )}
 
       {/* Prompt Input */}
       <div className="flex gap-3 items-end">

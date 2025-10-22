@@ -8,7 +8,6 @@ import PlaygroundSidebar from "@/components/PlaygroundSidebar";
 import PlaygroundPromptSection from "@/components/PlaygroundPromptSection";
 import PlaygroundInfoBox from "@/components/PlaygroundInfoBox";
 import ErrorMessage from "@/components/ErrorMessage";
-import ImageCard from "@/components/ImageCard";
 import ImagePreview from "@/components/ImagePreview";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
@@ -172,7 +171,7 @@ export default function PlayGroundPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-black-50 flex">
       {/* Sidebar */}
       <PlaygroundSidebar
         upscaleFactor={upscaleFactor}
@@ -187,29 +186,14 @@ export default function PlayGroundPage() {
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-2">
-              Upload Image
+              Upload Image to process it
             </h1>
-            <p className="text-gray-600">
-              Upload an image to process it, or describe an image to generate
-              one
-            </p>
           </div>
 
           {/* Image Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {/* Left: Uploaded Image */}
-            <ImageCard
-              title="Original Image"
-              action={
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors"
-                >
-                  Upload
-                </button>
-              }
-              minHeight="400px"
-            >
+            <div className="bg-white rounded-lg shadow-md overflow-hidden">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -217,57 +201,89 @@ export default function PlayGroundPage() {
                 onChange={onFileInputChange}
                 className="hidden"
               />
-              <ImagePreview src={selectedImage} alt="Original" />
-            </ImageCard>
+              <div
+                className="border-2 border-dashed border-gray-200 flex items-center justify-center bg-gray-50 relative"
+                style={{ minHeight: "400px" }}
+              >
+                <ImagePreview
+                  src={selectedImage}
+                  alt="Original"
+                  emptyMessage="Preview"
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="absolute bottom-4 right-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-lg"
+                >
+                  Upload Image
+                </button>
+              </div>
+            </div>
 
             {/* Right: Result */}
-            <ImageCard
-              title="Result"
-              action={
-                resultImage ? (
-                  <button
-                    onClick={downloadImage}
-                    className="inline-flex items-center px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+            <div className="bg-white rounded-lg shadow-md overflow-hidden relative">
+              {resultImage && (
+                <button
+                  onClick={downloadImage}
+                  className="absolute top-4 right-4 z-10 inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-lg"
+                >
+                  <svg
+                    className="w-4 h-4 mr-1.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    <svg
-                      className="w-4 h-4 mr-1.5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                      />
-                    </svg>
-                    Download
-                  </button>
-                ) : undefined
-              }
-              minHeight="400px"
-            >
-              {loading ? (
-                <LoadingSpinner size="lg" message="Processing..." />
-              ) : resultImage ? (
-                <ImagePreview src={resultImage} alt="Result" />
-              ) : analysisText ? (
-                <div className="w-full max-h-[400px] overflow-y-auto">
-                  <div className="prose prose-sm max-w-none text-gray-800 whitespace-pre-wrap">
-                    {analysisText}
-                  </div>
-                </div>
-              ) : (
-                <ImagePreview src="" alt="Results will appear here" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                    />
+                  </svg>
+                  Download
+                </button>
               )}
-            </ImageCard>
+              <div
+                className="border-2 border-dashed border-gray-200 flex items-center justify-center bg-gray-50"
+                style={{ minHeight: "400px" }}
+              >
+                {loading ? (
+                  <LoadingSpinner size="lg" message="Processing..." />
+                ) : resultImage ? (
+                  <ImagePreview src={resultImage} alt="Result" />
+                ) : analysisText ? (
+                  <div className="w-full max-h-[400px] overflow-y-auto p-4">
+                    <div className="prose prose-sm max-w-none text-gray-800 whitespace-pre-wrap">
+                      {analysisText}
+                    </div>
+                  </div>
+                ) : (
+                  <ImagePreview
+                    src=""
+                    alt="Results will appear here"
+                    emptyMessage="Result"
+                  />
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Error Message */}
           {error && (
             <ErrorMessage message={error} onDismiss={() => setError("")} />
           )}
+
+          {/* Instruction Text */}
+          <div className="mb-4">
+            {!imageFile ? (
+              <h1 className="text-2xl text-gray-600 italic">
+                Describe the image you want to generate...
+              </h1>
+            ) : (
+              <h1 className="text-2xl text-gray-600">
+                Choose an action or describe what you want:
+              </h1>
+            )}
+          </div>
 
           {/* Prompt Section */}
           <PlaygroundPromptSection
