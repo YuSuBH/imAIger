@@ -56,8 +56,8 @@ body {
 
 .animated-border:hover,
 .animated-border-nonhover {
-  box-shadow: 0 0 30px rgba(58, 41, 255, 0.6), 0 0 60px rgba(255, 148, 180, 0.4),
-    0 0 90px rgba(255, 50, 50, 0.3);
+  box-shadow: 0 0 30px rgba(39, 19, 255, 0.6), 0 0 60px rgba(230, 6, 148, 0.4),
+    0 0 90px rgba(247, 3, 174, 0.3);
 }
 
 .animated-border-inner {

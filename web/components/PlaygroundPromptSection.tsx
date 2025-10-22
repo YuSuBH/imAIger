@@ -60,7 +60,7 @@ export default function PlaygroundPromptSection({
         <button
           onClick={onSubmit}
           disabled={!canSubmit}
-          className="px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all h-[60px] flex flex-col items-center justify-center animated-border-nonhover"
+          className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all h-[60px] flex flex-col items-center justify-center animated-border-nonhover"
         >
           {loading ? (
             <>
