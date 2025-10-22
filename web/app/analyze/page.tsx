@@ -1,32 +1,28 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
-import VoiceInput from "@/components/VoiceInput";
+import { useImageUpload } from "@/hooks/useImageUpload";
+import { useImageOperations } from "@/hooks/useImageOperations";
+import ImageCard from "@/components/ImageCard";
+import ImagePreview from "@/components/ImagePreview";
+import ErrorMessage from "@/components/ErrorMessage";
+import PromptInput from "@/components/PromptInput";
 
 export default function AnalyzePage() {
-  const [selectedImage, setSelectedImage] = useState<string>("");
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const { selectedImage, imageFile, error, handleImageSelect, setError } =
+    useImageUpload();
+  const { analyzeImage: analyzeImageAPI } = useImageOperations();
+
   const [query, setQuery] = useState<string>("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [analysisResult, setAnalysisResult] = useState<string>("");
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-
-    setImageFile(file);
-    setError("");
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setSelectedImage(event.target?.result as string);
-    };
-    reader.onerror = () => {
-      setError("Failed to read image file");
-    };
-    reader.readAsDataURL(file);
+    if (file) {
+      handleImageSelect(file);
+      setAnalysisResult("");
+    }
   };
 
   const analyzeImage = async () => {
@@ -39,24 +35,8 @@ export default function AnalyzePage() {
     setError("");
 
     try {
-      const formData = new FormData();
-      formData.append("image", imageFile);
-      if (query) {
-        formData.append("query", query);
-      }
-
-      const res = await fetch(process.env.NEXT_PUBLIC_API_BASE + "analyze", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to analyze image");
-      }
-
-      const data = await res.json();
-      setAnalysisResult(data.text);
+      const result = await analyzeImageAPI({ imageFile, query });
+      setAnalysisResult(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
@@ -83,37 +63,30 @@ export default function AnalyzePage() {
               <input
                 type="file"
                 accept="image/*"
-                onChange={handleImageSelect}
+                onChange={handleFileChange}
                 className="block w-full text-sm text-gray-700 file:border file:py-2 file:px-3 file:rounded file:border-gray-300 file:bg-white file:text-sm file:font-semibold hover:file:bg-gray-50"
               />
 
-              {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
+              <ErrorMessage message={error} onDismiss={() => setError("")} />
 
               <div className="mt-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Prompt (optional)
                 </label>
-                <div className="flex gap-2">
-                  <textarea
-                    placeholder="What you want from the image? Describe here..."
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    className="flex-1 min-h-[120px] p-3 border border-gray-200 rounded resize-vertical focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                  ></textarea>
-                  <VoiceInput
-                    onTranscript={(text) =>
-                      setQuery((prev) => prev + " " + text)
-                    }
-                    disabled={loading}
-                  />
-                </div>
+                <PromptInput
+                  value={query}
+                  onChange={setQuery}
+                  onSubmit={analyzeImage}
+                  placeholder="What you want from the image? Describe here..."
+                  disabled={loading}
+                />
               </div>
 
               <div className="mt-4">
                 <button
                   onClick={analyzeImage}
                   disabled={loading || !selectedImage}
-                  className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed`}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {loading && (
                     <svg
@@ -143,28 +116,13 @@ export default function AnalyzePage() {
             </div>
 
             <div className="w-full sm:w-80">
-              <div className="border border-dashed border-gray-200 rounded-lg h-full p-3 flex items-center justify-center bg-gray-50">
-                {!selectedImage ? (
-                  <div className="text-center text-sm text-gray-500">
-                    No image selected
-                  </div>
-                ) : (
-                  <div className="w-full">
-                    <div className="bg-white rounded overflow-hidden shadow-sm p-2">
-                      <Image
-                        src={selectedImage}
-                        alt="Selected"
-                        width={320}
-                        height={240}
-                        className="w-full h-auto object-contain rounded"
-                      />
-                    </div>
-                    <div className="text-xs text-gray-500 mt-2 text-center">
-                      Preview
-                    </div>
-                  </div>
-                )}
-              </div>
+              <ImageCard title="Preview">
+                <ImagePreview
+                  src={selectedImage}
+                  alt="Selected"
+                  emptyMessage="No image selected"
+                />
+              </ImageCard>
             </div>
           </div>
         </div>
@@ -178,7 +136,7 @@ export default function AnalyzePage() {
           </div>
         )}
 
-        {!analysisResult && (
+        {!analysisResult && !loading && (
           <div className="mt-4 text-sm text-gray-500">
             Results will appear here after analysis.
           </div>

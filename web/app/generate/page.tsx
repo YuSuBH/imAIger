@@ -1,58 +1,49 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
-import VoiceInput from "@/components/VoiceInput";
+import { useImageOperations } from "@/hooks/useImageOperations";
+import { downloadImage as downloadImageUtil } from "@/lib/imageUtils";
+import ImageCard from "@/components/ImageCard";
+import ImagePreview from "@/components/ImagePreview";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import ErrorMessage from "@/components/ErrorMessage";
+import PromptInput from "@/components/PromptInput";
 
 export default function GeneratePage() {
   const [prompt, setPrompt] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const { generateImage: generateImageAPI } = useImageOperations();
 
-  const generateImage = async () => {
+  const handleGenerate = async () => {
+    if (!prompt.trim()) {
+      setError("Please enter a prompt");
+      return;
+    }
+
     setLoading(true);
     setError("");
     setImageUrl("");
+
     try {
-      const res = await fetch(process.env.NEXT_PUBLIC_API_BASE + "generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ prompt }),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to generate image");
-      }
-      const data = await res.json();
-      setImageUrl(data.imageUrl);
-    } catch (err: unknown) {
-      // avoid explicit `any` to satisfy eslint rule; extract message safely
-      const message =
-        err instanceof Error ? err.message : String(err ?? "Unknown error");
-      setError(message);
+      const url = await generateImageAPI({ prompt });
+      setImageUrl(url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setLoading(false);
     }
   };
 
-  const downloadImage = () => {
-    if (!imageUrl) return;
-
-    fetch(imageUrl)
-      .then((res) => res.blob())
-      .then((blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = "ai-generated-image.png";
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
-      });
+  const handleDownload = () => {
+    if (imageUrl) {
+      try {
+        downloadImageUtil(imageUrl, "ai-generated-image.png");
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to download");
+      }
+    }
   };
 
   return (
@@ -65,27 +56,26 @@ export default function GeneratePage() {
             image URL.
           </p>
 
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Prompt
-          </label>
-          <div className="flex gap-2">
-            <textarea
-              placeholder="A futuristic city at sunset with flying cars..."
+          <ErrorMessage message={error} onDismiss={() => setError("")} />
+
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Prompt
+            </label>
+            <PromptInput
               value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              className="flex-1 min-h-[140px] p-3 border border-gray-200 rounded resize-vertical focus:outline-none focus:ring-2 focus:ring-indigo-200"
-            ></textarea>
-            <VoiceInput
-              onTranscript={(text) => setPrompt((prev) => prev + " " + text)}
+              onChange={setPrompt}
+              onSubmit={handleGenerate}
+              placeholder="A futuristic city at sunset with flying cars..."
               disabled={loading}
             />
           </div>
 
           <div className="mt-4 flex items-center gap-3">
             <button
-              onClick={generateImage}
+              onClick={handleGenerate}
+              disabled={loading || !prompt.trim()}
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed"
-              disabled={loading}
             >
               {loading && (
                 <svg
@@ -114,42 +104,61 @@ export default function GeneratePage() {
 
             {imageUrl && (
               <button
-                onClick={downloadImage}
+                onClick={handleDownload}
                 className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm rounded-md bg-white hover:bg-gray-50"
               >
                 Download
               </button>
             )}
           </div>
-
-          {error && <p className="text-red-600 text-sm mt-3">{error}</p>}
-
-          <div className="mt-6">
-            <h2 className="text-lg font-medium mb-2">Preview</h2>
-            <div className="border border-dashed border-gray-200 rounded-lg p-4 flex items-center justify-center bg-gray-50 min-h-[200px]">
-              {imageUrl ? (
-                <div className="w-full flex flex-col items-center gap-3">
-                  <div className="bg-white rounded overflow-hidden shadow p-2">
-                    <Image
-                      src={imageUrl}
-                      alt="Generated"
-                      width={512}
-                      height={384}
-                      className="max-w-full h-auto object-contain rounded"
-                    />
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    Right-click the image to open or use the Download button.
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center text-sm text-gray-500">
-                  Generated image will appear here...
-                </div>
-              )}
-            </div>
-          </div>
         </div>
+
+        <div className="mt-6">
+          <ImageCard
+            title="Generated Image"
+            action={
+              imageUrl ? (
+                <button
+                  onClick={handleDownload}
+                  className="inline-flex items-center px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                >
+                  <svg
+                    className="w-4 h-4 mr-1.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                    />
+                  </svg>
+                  Download
+                </button>
+              ) : undefined
+            }
+            minHeight="300px"
+          >
+            {loading ? (
+              <LoadingSpinner message="Generating image..." />
+            ) : (
+              <ImagePreview
+                src={imageUrl}
+                alt="Generated"
+                emptyMessage="Generated image will appear here..."
+              />
+            )}
+          </ImageCard>
+        </div>
+
+        {imageUrl && !loading && (
+          <div className="mt-4 text-center text-sm text-gray-600">
+            Right-click the image to open in a new tab or use the Download
+            button.
+          </div>
+        )}
       </div>
     </div>
   );

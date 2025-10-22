@@ -1,36 +1,39 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
+import { useImageUpload } from "@/hooks/useImageUpload";
+import { useImageOperations } from "@/hooks/useImageOperations";
+import { downloadImage as downloadImageUtil } from "@/lib/imageUtils";
+import ImageCard from "@/components/ImageCard";
+import ImagePreview from "@/components/ImagePreview";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import ErrorMessage from "@/components/ErrorMessage";
 
 export default function UpscalePage() {
-  const [selectedImage, setSelectedImage] = useState<string>("");
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const {
+    selectedImage,
+    imageFile,
+    error,
+    handleImageSelect,
+    clearImage,
+    setError,
+  } = useImageUpload();
+  const { upscaleImage: upscaleImageAPI } = useImageOperations();
+
   const [upscaledImageUrl, setUpscaledImageUrl] = useState<string>("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [upscaleFactor, setUpscaleFactor] = useState<string>("2");
   const [format, setFormat] = useState<string>("JPG");
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-
-    setImageFile(file);
-    setError("");
-    setUpscaledImageUrl("");
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setSelectedImage(event.target?.result as string);
-    };
-    reader.onerror = () => {
-      setError("Failed to read image file");
-    };
-    reader.readAsDataURL(file);
+    if (file) {
+      handleImageSelect(file);
+      setUpscaledImageUrl("");
+    }
   };
 
-  const upscaleImage = async () => {
+  const handleUpscale = async () => {
     if (!imageFile) {
       setError("Please select an image first");
       return;
@@ -41,35 +44,12 @@ export default function UpscalePage() {
     setUpscaledImageUrl("");
 
     try {
-      const formData = new FormData();
-      formData.append("image", imageFile);
-      formData.append("upscale_factor", upscaleFactor);
-      formData.append("format", format);
-
-      const res = await fetch(process.env.NEXT_PUBLIC_API_BASE + "upscale", {
-        method: "POST",
-        body: formData,
+      const url = await upscaleImageAPI({
+        imageFile,
+        factor: upscaleFactor,
+        format,
       });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to upscale image");
-      }
-
-      const data = await res.json();
-
-      // Check if the response contains the upscaled image URL
-      // Response structure: { success: true, data: { status: "success", data: { id: "...", url: "..." } } }
-      if (data.data && data.data.data && data.data.data.url) {
-        setUpscaledImageUrl(data.data.data.url);
-      } else if (data.data && data.data.url) {
-        setUpscaledImageUrl(data.data.url);
-      } else if (data.data && typeof data.data === "string") {
-        setUpscaledImageUrl(data.data);
-      } else {
-        console.error("Unexpected response format:", data);
-        throw new Error("Invalid response format from server");
-      }
+      setUpscaledImageUrl(url);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
@@ -77,31 +57,22 @@ export default function UpscalePage() {
     }
   };
 
-  const downloadImage = () => {
-    if (!upscaledImageUrl) return;
-
-    fetch(upscaledImageUrl)
-      .then((res) => res.blob())
-      .then((blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `upscaled-${upscaleFactor}x.${format.toLowerCase()}`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
-      })
-      .catch((err) => {
-        setError("Failed to download image: " + err.message);
-      });
+  const handleDownload = () => {
+    if (upscaledImageUrl) {
+      try {
+        downloadImageUtil(
+          upscaledImageUrl,
+          `upscaled-${upscaleFactor}x.${format.toLowerCase()}`
+        );
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to download");
+      }
+    }
   };
 
-  const reset = () => {
-    setSelectedImage("");
-    setImageFile(null);
+  const handleReset = () => {
+    clearImage();
     setUpscaledImageUrl("");
-    setError("");
   };
 
   return (
@@ -122,10 +93,12 @@ export default function UpscalePage() {
             <input
               type="file"
               accept="image/*"
-              onChange={handleImageSelect}
+              onChange={handleFileChange}
               className="block w-full text-sm text-gray-700 file:border file:py-2 file:px-3 file:rounded file:border-gray-300 file:bg-white file:text-sm file:font-semibold hover:file:bg-gray-50"
             />
           </div>
+
+          <ErrorMessage message={error} onDismiss={() => setError("")} />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
             <div>
@@ -159,15 +132,9 @@ export default function UpscalePage() {
             </div>
           </div>
 
-          {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
-              {error}
-            </div>
-          )}
-
           <div className="flex items-center gap-3 mb-6">
             <button
-              onClick={upscaleImage}
+              onClick={handleUpscale}
               disabled={loading || !selectedImage}
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed"
             >
@@ -198,7 +165,7 @@ export default function UpscalePage() {
 
             {upscaledImageUrl && (
               <button
-                onClick={downloadImage}
+                onClick={handleDownload}
                 className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm rounded-md bg-white hover:bg-gray-50"
               >
                 <svg
@@ -220,7 +187,7 @@ export default function UpscalePage() {
 
             {(selectedImage || upscaledImageUrl) && (
               <button
-                onClick={reset}
+                onClick={handleReset}
                 className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm rounded-md bg-white hover:bg-gray-50"
               >
                 Reset
@@ -230,56 +197,52 @@ export default function UpscalePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Original Image */}
-            <div>
-              <h2 className="text-lg font-medium mb-3">Original</h2>
-              <div className="border border-gray-200 rounded-lg p-4 flex items-center justify-center bg-gray-50 min-h-[300px]">
-                {selectedImage ? (
-                  <div className="w-full">
-                    <div className="bg-white rounded overflow-hidden shadow-sm p-2">
-                      <Image
-                        src={selectedImage}
-                        alt="Original"
-                        width={400}
-                        height={400}
-                        className="w-full h-auto object-contain rounded max-h-[400px]"
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center text-sm text-gray-500">
-                    No image selected
-                  </div>
-                )}
-              </div>
-            </div>
+            <ImageCard title="Original" minHeight="300px">
+              <ImagePreview
+                src={selectedImage}
+                alt="Original"
+                emptyMessage="No image selected"
+              />
+            </ImageCard>
 
             {/* Upscaled Image */}
-            <div>
-              <h2 className="text-lg font-medium mb-3">
-                Upscaled ({upscaleFactor}x)
-              </h2>
-              <div className="border border-gray-200 rounded-lg p-4 flex items-center justify-center bg-gray-50 min-h-[300px]">
-                {upscaledImageUrl ? (
-                  <div className="w-full">
-                    <div className="bg-white rounded overflow-hidden shadow-sm p-2">
-                      <Image
-                        src={upscaledImageUrl}
-                        alt="Upscaled"
-                        width={400}
-                        height={400}
-                        className="w-full h-auto object-contain rounded max-h-[400px]"
+            <ImageCard
+              title={`Upscaled (${upscaleFactor}x)`}
+              minHeight="300px"
+              action={
+                upscaledImageUrl ? (
+                  <button
+                    onClick={handleDownload}
+                    className="inline-flex items-center px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                  >
+                    <svg
+                      className="w-4 h-4 mr-1.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
                       />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center text-sm text-gray-500">
-                    {loading
-                      ? "Processing..."
-                      : "Upscaled image will appear here"}
-                  </div>
-                )}
-              </div>
-            </div>
+                    </svg>
+                    Download
+                  </button>
+                ) : undefined
+              }
+            >
+              {loading ? (
+                <LoadingSpinner message="Upscaling image..." />
+              ) : (
+                <ImagePreview
+                  src={upscaledImageUrl}
+                  alt="Upscaled"
+                  emptyMessage="Upscaled image will appear here"
+                />
+              )}
+            </ImageCard>
           </div>
 
           <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800">
