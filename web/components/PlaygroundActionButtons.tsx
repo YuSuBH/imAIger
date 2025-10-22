@@ -14,10 +14,10 @@ export default function PlaygroundActionButtons({
   };
 
   const buttonClass = (option: ActionType) =>
-    `px-3 py-1.5 text-sm rounded-md border transition-colors ${
+    `px-3 py-1.5 text-sm rounded-md border transition-all shadow-lg ${
       selectedOption === option
-        ? "bg-indigo-600 text-white border-indigo-600"
-        : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+        ? "bg-red-600 text-white border-red-600 hover:bg-red-700"
+        : "bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600"
     }`;
 
   return (

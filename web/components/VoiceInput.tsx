@@ -67,7 +67,7 @@ export default function VoiceInput({
       type="button"
       onClick={startListening}
       disabled={disabled || isListening}
-      className={`inline-flex items-center justify-center p-2 rounded-md border ${
+      className={`inline-flex items-center justify-center h-[60px] w-[60px] rounded-lg border ${
         isListening
           ? "bg-red-50 border-red-300 text-red-600"
           : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
@@ -76,7 +76,7 @@ export default function VoiceInput({
     >
       {isListening ? (
         <svg
-          className="w-5 h-5 animate-pulse"
+          className="w-6 h-6 animate-pulse"
           fill="currentColor"
           viewBox="0 0 24 24"
         >
@@ -85,7 +85,7 @@ export default function VoiceInput({
         </svg>
       ) : (
         <svg
-          className="w-5 h-5"
+          className="w-6 h-6"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"

@@ -7,6 +7,7 @@ import { useAIInterpret, ActionType } from "@/hooks/useAIInterpret";
 import PlaygroundSidebar from "@/components/PlaygroundSidebar";
 import PlaygroundPromptSection from "@/components/PlaygroundPromptSection";
 import PlaygroundInfoBox from "@/components/PlaygroundInfoBox";
+import PlaygroundActionButtons from "@/components/PlaygroundActionButtons";
 import ErrorMessage from "@/components/ErrorMessage";
 import ImagePreview from "@/components/ImagePreview";
 import LoadingSpinner from "@/components/LoadingSpinner";
@@ -171,7 +172,7 @@ export default function PlayGroundPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black-50 flex">
+    <div className="min-h-screen bg-black flex">
       {/* Sidebar */}
       <PlaygroundSidebar
         upscaleFactor={upscaleFactor}
@@ -185,7 +186,7 @@ export default function PlayGroundPage() {
         <div className="max-w-7xl mx-auto p-8">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            <h1 className="text-4xl font-bold bg-white bg-clip-text text-transparent mb-2">
               Upload Image to process it
             </h1>
           </div>
@@ -193,7 +194,7 @@ export default function PlayGroundPage() {
           {/* Image Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {/* Left: Uploaded Image */}
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg shadow-xl overflow-hidden border border-red-500/20">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -202,7 +203,7 @@ export default function PlayGroundPage() {
                 className="hidden"
               />
               <div
-                className="border-2 border-dashed border-gray-200 flex items-center justify-center bg-gray-50 relative"
+                className="flex items-center justify-center bg-gray-900/50 relative"
                 style={{ minHeight: "400px" }}
               >
                 <ImagePreview
@@ -212,7 +213,7 @@ export default function PlayGroundPage() {
                 />
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="absolute bottom-4 right-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-lg"
+                  className="absolute bottom-4 right-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all shadow-lg"
                 >
                   Upload Image
                 </button>
@@ -220,11 +221,11 @@ export default function PlayGroundPage() {
             </div>
 
             {/* Right: Result */}
-            <div className="bg-white rounded-lg shadow-md overflow-hidden relative">
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg shadow-xl overflow-hidden border border-red-500/20 relative">
               {resultImage && (
                 <button
                   onClick={downloadImage}
-                  className="absolute top-4 right-4 z-10 inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-lg"
+                  className="absolute top-4 right-4 z-10 inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all shadow-lg"
                 >
                   <svg
                     className="w-4 h-4 mr-1.5"
@@ -243,7 +244,7 @@ export default function PlayGroundPage() {
                 </button>
               )}
               <div
-                className="border-2 border-dashed border-gray-200 flex items-center justify-center bg-gray-50"
+                className="flex items-center justify-center bg-gray-900/50"
                 style={{ minHeight: "400px" }}
               >
                 {loading ? (
@@ -252,7 +253,7 @@ export default function PlayGroundPage() {
                   <ImagePreview src={resultImage} alt="Result" />
                 ) : analysisText ? (
                   <div className="w-full max-h-[400px] overflow-y-auto p-4">
-                    <div className="prose prose-sm max-w-none text-gray-800 whitespace-pre-wrap">
+                    <div className="prose prose-sm prose-invert max-w-none text-gray-200 whitespace-pre-wrap">
                       {analysisText}
                     </div>
                   </div>
@@ -275,13 +276,19 @@ export default function PlayGroundPage() {
           {/* Instruction Text */}
           <div className="mb-4">
             {!imageFile ? (
-              <h1 className="text-2xl text-gray-600 italic">
-                Describe the image you want to generate...
+              <h1 className="text-4xl font-bold bg-white bg-clip-text text-transparent mb-2">
+                or Describe the image you want to generate...
               </h1>
             ) : (
-              <h1 className="text-2xl text-gray-600">
-                Choose an action or describe what you want:
-              </h1>
+              <div className="flex items-center justify-between">
+                <h1 className="text-2xl text-gray-200">
+                  Choose an action or describe what you want:
+                </h1>
+                <PlaygroundActionButtons
+                  selectedOption={selectedOption}
+                  onOptionSelect={setSelectedOption}
+                />
+              </div>
             )}
           </div>
 
@@ -293,7 +300,6 @@ export default function PlayGroundPage() {
             selectedOption={selectedOption}
             hasResult={!!(selectedImage || resultImage)}
             onPromptChange={setPrompt}
-            onOptionSelect={setSelectedOption}
             onSubmit={handleSubmit}
             onReset={handleReset}
           />
