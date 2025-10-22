@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { useImageOperations } from "@/hooks/useImageOperations";
 import { useAIInterpret, ActionType } from "@/hooks/useAIInterpret";
+import { saveToHistory } from "@/lib/historyUtils";
 import PlaygroundSidebar from "@/components/PlaygroundSidebar";
 import PlaygroundPromptSection from "@/components/PlaygroundPromptSection";
 import PlaygroundInfoBox from "@/components/PlaygroundInfoBox";
@@ -48,6 +49,13 @@ export default function PlayGroundPage() {
     const imageUrl = await generateImage({ prompt: generationPrompt });
     setResultImage(imageUrl);
     setAnalysisText("");
+
+    // Save to history
+    saveToHistory({
+      type: "generate",
+      input: { prompt: generationPrompt },
+      output: { imageUrl },
+    });
   };
 
   const handleAnalyzeImage = async (query?: string) => {
@@ -55,6 +63,16 @@ export default function PlayGroundPage() {
     const text = await analyzeImage({ imageFile, query });
     setAnalysisText(text);
     setResultImage("");
+
+    // Save to history
+    saveToHistory({
+      type: "analyze",
+      input: {
+        imageName: imageFile.name,
+        query: query || "No specific query",
+      },
+      output: { text },
+    });
   };
 
   const handleUpscaleImage = async (factor: string, fmt: string) => {
@@ -62,6 +80,16 @@ export default function PlayGroundPage() {
     const imageUrl = await upscaleImage({ imageFile, factor, format: fmt });
     setResultImage(imageUrl);
     setAnalysisText("");
+
+    // Save to history
+    saveToHistory({
+      type: "upscale",
+      input: {
+        imageName: imageFile.name,
+        factor,
+      },
+      output: { imageUrl },
+    });
   };
 
   const handleRemoveBackground = async () => {
@@ -69,6 +97,13 @@ export default function PlayGroundPage() {
     const blobUrl = await removeBackground({ imageFile });
     setResultImage(blobUrl);
     setAnalysisText("");
+
+    // Save to history
+    saveToHistory({
+      type: "bgRemove",
+      input: { imageName: imageFile.name },
+      output: { imageUrl: blobUrl },
+    });
   };
 
   const handleSubmit = async () => {

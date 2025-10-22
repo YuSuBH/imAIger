@@ -12,9 +12,9 @@ export default function Navbar() {
         <div className="flex items-center space-x-4">
           <Link
             href={"/playGround"}
-            className="text-slate-900 hover:text-sky-500 font-semibold"
+            className="font-semibold bg-gradient-to-r from-purple-600 via-pink-500 to-blue-500 bg-clip-text text-transparent hover:from-purple-500 hover:via-pink-400 hover:to-blue-400 animate-pulse drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]"
           >
-            🎮 Playground
+            Playground
           </Link>
           <Link href={"/analyze"} className="text-slate-900 hover:text-sky-500">
             Analyze
@@ -33,6 +33,9 @@ export default function Navbar() {
             className="text-slate-900 hover:text-sky-500"
           >
             Remove BG
+          </Link>
+          <Link href={"/history"} className="text-slate-900 hover:text-sky-500">
+            History
           </Link>
         </div>
       </div>
