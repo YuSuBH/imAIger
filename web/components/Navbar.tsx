@@ -10,6 +10,12 @@ export default function Navbar() {
         </Link>
 
         <div className="flex items-center space-x-4">
+          <Link
+            href={"/playGround"}
+            className="text-slate-900 hover:text-sky-500 font-semibold"
+          >
+            🎮 Playground
+          </Link>
           <Link href={"/analyze"} className="text-slate-900 hover:text-sky-500">
             Analyze
           </Link>

@@ -4,6 +4,7 @@ import generateRoute from "./routes/generate.js";
 import analyzeRoute from "./routes/analyze.js";
 import upscaleRoute from "./routes/upscale.js";
 import bgRemoveRoute from "./routes/bgRemove.js";
+import interpretRoute from "./routes/interpret.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -19,6 +20,7 @@ app.use("/generate", generateRoute);
 app.use("/analyze", analyzeRoute);
 app.use("/upscale", upscaleRoute);
 app.use("/bgRemove", bgRemoveRoute);
+app.use("/interpret", interpretRoute);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
