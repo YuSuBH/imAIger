@@ -217,8 +217,19 @@ export default function PlayGroundPage() {
       />
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="max-w-7xl mx-auto p-8">
+      <main className="flex-1 overflow-y-auto relative">
+        {/* Ember Glow Background */}
+        <div
+          className="absolute inset-0 z-0"
+          style={{
+            backgroundImage: `
+              radial-gradient(circle at 50% 100%, rgba(255, 69, 0, 0.6) 0%, transparent 60%),
+              radial-gradient(circle at 50% 100%, rgba(255, 140, 0, 0.4) 0%, transparent 70%),
+              radial-gradient(circle at 50% 100%, rgba(255, 215, 0, 0.3) 0%, transparent 80%)
+            `,
+          }}
+        />
+        <div className="max-w-7xl mx-auto p-8 relative z-10">
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-4xl font-bold bg-white bg-clip-text text-transparent mb-2">
