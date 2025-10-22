@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 interface PlaygroundSidebarProps {
   upscaleFactor: string;
@@ -18,11 +19,9 @@ export default function PlaygroundSidebar({
       {/* Logo */}
       <Link
         href="/"
-        className="p-2 border-b border-gray-900 block hover:bg-gray-900 transition-colors"
+        className="p-2 border-b border-gray-900 flex items-center justify-center hover:bg-gray-900 transition-colors"
       >
-        <h2 className="text-xl font-bold bg-gradient-to-r from-purple-400 via-pink-500 to-orange-400 bg-clip-text text-transparent">
-          AI Playground
-        </h2>
+        <Image src="/logo.png" alt="AI Studio Logo" width={100} height={100} />
       </Link>
 
       {/* Configuration Panel */}

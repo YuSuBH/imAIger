@@ -71,7 +71,7 @@ export default function Details() {
           {features.map((feature, index) => (
             <div
               key={index}
-              className="w-full bg-black backdrop-blur-sm border border-purple-500/30 rounded-2xl p-8 hover:border-purple-400/50 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/20"
+              className="w-full bg-black backdrop-blur-sm border border-gray-500/30 rounded-2xl p-8 transition-all duration-300 hover:shadow-lg"
             >
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                 <div className="flex-1">
