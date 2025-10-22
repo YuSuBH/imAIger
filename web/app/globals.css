@@ -19,8 +19,49 @@
   }
 }
 
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+@keyframes gradient-border {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animated-border {
+  position: relative;
+  background: linear-gradient(90deg, #3a29ff, #ff94b4, #ff3232, #3a29ff);
+  background-size: 300% 300%;
+  animation: gradient-border 3s ease infinite;
+  padding: 2px;
+  border-radius: 9999px;
+  transition: all 0.3s ease;
+}
+
+.animated-border:hover {
+  box-shadow: 0 0 30px rgba(58, 41, 255, 0.6), 0 0 60px rgba(255, 148, 180, 0.4),
+    0 0 90px rgba(255, 50, 50, 0.3);
+}
+
+.animated-border-inner {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  border-radius: 9999px;
+  padding: 1rem 2rem;
 }
