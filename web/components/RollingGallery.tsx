@@ -19,6 +19,7 @@ const IMGS: string[] = [
   "/result-1761141442889.png",
   "/result-1761141508230.png",
   "/result-1761141666286.png",
+  "/ai-generated-image (2).png",
 ];
 
 interface RollingGalleryProps {

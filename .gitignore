@@ -45,3 +45,6 @@ web/.vercel/
 web/next-env.d.ts
 
 server/.api/
+
+REFACTORING_GUIDE.md
+REFACTORING_COMPLETE.md
