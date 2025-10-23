@@ -33,6 +33,10 @@ yarn-error.log*
 # Environment files
 .env*
 
+# Refactoring documentation
+REFACTORING_GUIDE.md
+REFACTORING_COMPLETE.md
+
 # Vercel
 web/.vercel/
 
@@ -46,5 +50,3 @@ web/next-env.d.ts
 
 server/.api/
 
-REFACTORING_GUIDE.md
-REFACTORING_COMPLETE.md
