@@ -32,11 +32,12 @@ A modern AI-powered image manipulation platform that combines multiple AI servic
 
 - **Runtime**: Node.js with Express 5.x
 - **AI Services**:
-  - Google Gemini AI
+  - Google AI Studio (Imagen 3 — image generation)
+  - Google Gemini AI (image analysis & AI interpretation)
+  - Cloudflare Workers AI (Flux Schnell — image generation)
   - OpenAI
   - Hugging Face
   - Picsart API
-  - Pollinations.ai
 - **Image Processing**: Sharp
 - **File Upload**: Multer
 - **Storage**: ImageKit
@@ -91,8 +92,12 @@ Create a `.env` file in the `server` directory:
 # Server Configuration
 PORT=3001
 
-# Google Gemini AI
-GEMINI_API_KEY=your_gemini_api_key_here
+# Google Gemini AI (used for image analysis, AI interpretation, and Imagen 3 image generation)
+GOOGLE_API_KEY=your_google_api_key_here
+
+# Cloudflare Workers AI (https://dash.cloudflare.com/profile/api-tokens)
+CLOUDFLARE_ACCOUNT_ID=your_cloudflare_account_id
+CLOUDFLARE_API_TOKEN=your_cloudflare_api_token
 
 # OpenAI (Optional)
 OPENAI_API_KEY=your_openai_api_key_here
@@ -102,6 +107,9 @@ HUGGINGFACE_API_KEY=your_huggingface_api_key_here
 
 # Picsart API (Optional)
 PICSART_API_KEY=your_picsart_api_key_here
+
+# Remove.bg (for background removal)
+REMOVE_BG_API_KEY=your_remove_bg_api_key_here
 
 # ImageKit
 IMAGEKIT_PUBLIC_KEY=your_imagekit_public_key
@@ -235,13 +243,40 @@ npm run lint
 
 ## 📝 API Endpoints
 
-| Endpoint     | Method | Description                       |
-| ------------ | ------ | --------------------------------- |
-| `/generate`  | POST   | Generate images from text prompts |
-| `/bgRemove`  | POST   | Remove background from images     |
-| `/upscale`   | POST   | Upscale image resolution          |
-| `/analyze`   | POST   | Analyze image content             |
-| `/interpret` | POST   | Get AI interpretation of images   |
+| Endpoint     | Method | Description                                         |
+| ------------ | ------ | --------------------------------------------------- |
+| `/generate`  | POST   | Generate images from text prompts (multi-provider)  |
+| `/bgRemove`  | POST   | Remove background from images                       |
+| `/upscale`   | POST   | Upscale image resolution                            |
+| `/analyze`   | POST   | Analyze image content                               |
+| `/interpret` | POST   | Get AI interpretation of images                     |
+
+### `/generate` Request Body
+
+```json
+{
+  "prompt": "A futuristic city at sunset",
+  "provider": "google" 
+}
+```
+
+- `provider`: Optional provider name (defaults to `"cloudflare"`).
+- Response: `{ imageUrl: "data:image/jpeg;base64,...", prompt, provider: "cloudflare" }`
+
+## 🏛️ Provider Architecture
+
+Image generation is handled by a dedicated service inside `server/src/routes/generate.js`:
+
+| Provider | Model | Notes |
+|---|---|---|
+| `cloudflare` | Flux Schnell (`@cf/black-forest-labs/flux-1-schnell`) | Uses `CLOUDFLARE_ACCOUNT_ID` + `CLOUDFLARE_API_TOKEN` |
+
+To add a new provider in the future:
+1. Add a `generateWithXxx(prompt)` function in `generate.js`
+2. Add `"xxx"` to the `validProviders` array
+3. Dispatch to it in the `if/else` block
+4. Add `"xxx"` to the `ImageProvider` union type in `web/hooks/useImageOperations.ts`
+5. Add a new entry to the `PROVIDERS` array in `web/components/ProviderSelector.tsx`
 
 ## 🤝 Contributing
 
@@ -266,8 +301,9 @@ This project is licensed under the ISC License.
 ## 🙏 Acknowledgments
 
 - [Next.js](https://nextjs.org/) - The React Framework
-- [Google Gemini AI](https://ai.google.dev/) - AI capabilities
-- [Pollinations.ai](https://pollinations.ai/) - Free image generation
+- [Google AI Studio](https://ai.google.dev/) - Imagen 3 image generation
+- [Google Gemini AI](https://ai.google.dev/) - AI analysis & interpretation
+- [Cloudflare Workers AI](https://developers.cloudflare.com/workers-ai/) - Flux Schnell image generation
 - [Picsart API](https://picsart.io/) - Image manipulation services
 - [ImageKit](https://imagekit.io/) - Image storage and delivery
 - [Hugging Face](https://huggingface.co/) - AI models and inference

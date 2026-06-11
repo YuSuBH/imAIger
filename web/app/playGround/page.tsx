@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { useImageOperations } from "@/hooks/useImageOperations";
+import type { ImageProvider } from "@/hooks/useImageOperations";
 import { useAIInterpret, ActionType } from "@/hooks/useAIInterpret";
 import { saveToHistory } from "@/lib/historyUtils";
 import PlaygroundSidebar from "@/components/PlaygroundSidebar";
@@ -35,6 +36,9 @@ export default function PlayGroundPage() {
   const [upscaleFactor, setUpscaleFactor] = useState<string>("2");
   const [format, setFormat] = useState<string>("JPG");
 
+  // Image generation provider
+  const provider: ImageProvider = "cloudflare";
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const onFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,8 +49,8 @@ export default function PlayGroundPage() {
     setAnalysisText("");
   };
 
-  const handleGenerateImage = async (generationPrompt: string) => {
-    const imageUrl = await generateImage({ prompt: generationPrompt });
+  const handleGenerateImage = async (generationPrompt: string, generationProvider?: ImageProvider) => {
+    const imageUrl = await generateImage({ prompt: generationPrompt, provider: generationProvider ?? provider });
     setResultImage(imageUrl);
     setAnalysisText("");
 
@@ -142,7 +146,7 @@ export default function PlayGroundPage() {
 
       // If only prompt, default to generate
       if (prompt && !imageFile) {
-        await handleGenerateImage(prompt);
+        await handleGenerateImage(prompt, provider);
         return;
       }
 
@@ -152,7 +156,7 @@ export default function PlayGroundPage() {
       // Execute the interpreted action
       switch (interpretation.action) {
         case "GENERATE":
-          await handleGenerateImage(interpretation.parameters.query || prompt);
+          await handleGenerateImage(interpretation.parameters.query || prompt, provider);
           break;
         case "ANALYZE":
           await handleAnalyzeImage(interpretation.parameters.query);

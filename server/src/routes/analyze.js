@@ -53,7 +53,7 @@ router.post("/", upload.single("image"), async (req, res) => {
 
     // Generate content using Google AI
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-2.5-flash",
       contents: contents,
     });
 

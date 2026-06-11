@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useImageOperations } from "@/hooks/useImageOperations";
+import type { ImageProvider } from "@/hooks/useImageOperations";
 import { downloadImage as downloadImageUtil } from "@/lib/imageUtils";
 import { saveToHistory } from "@/lib/historyUtils";
 import ImageCard from "@/components/ImageCard";
@@ -16,6 +17,7 @@ export default function GeneratePage() {
   const [imageUrl, setImageUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const provider: ImageProvider = "cloudflare";
   const { generateImage: generateImageAPI } = useImageOperations();
 
   const handleGenerate = async () => {
@@ -29,13 +31,13 @@ export default function GeneratePage() {
     setImageUrl("");
 
     try {
-      const url = await generateImageAPI({ prompt });
+      const url = await generateImageAPI({ prompt, provider });
       setImageUrl(url);
 
       // Save to history
       saveToHistory({
         type: "generate",
-        input: { prompt },
+        input: { prompt, provider } as { prompt: string; provider: string },
         output: { imageUrl: url },
       });
     } catch (err) {
@@ -63,8 +65,7 @@ export default function GeneratePage() {
           <div className="bg-white shadow rounded-lg p-6">
             <h1 className="text-2xl font-semibold mb-3">Generate Image</h1>
             <p className="text-sm text-gray-600 mb-4">
-              Describe the image you want to generate. The AI will return a
-              single image URL.
+              Describe the image you want to generate.
             </p>
 
             <ErrorMessage message={error} onDismiss={() => setError("")} />
@@ -175,3 +176,5 @@ export default function GeneratePage() {
     </>
   );
 }
+
+

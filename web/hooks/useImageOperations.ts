@@ -1,5 +1,8 @@
+export type ImageProvider = "cloudflare";
+
 export interface GenerateParams {
   prompt: string;
+  provider?: ImageProvider;
 }
 
 export interface AnalyzeParams {
@@ -24,7 +27,10 @@ export function useImageOperations() {
     const res = await fetch(API_BASE + "generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt: params.prompt }),
+      body: JSON.stringify({
+        prompt: params.prompt,
+        provider: params.provider ?? "cloudflare",
+      }),
     });
 
     if (!res.ok) {
@@ -35,6 +41,7 @@ export function useImageOperations() {
     const data = await res.json();
     return data.imageUrl;
   };
+
 
   const analyzeImage = async (params: AnalyzeParams): Promise<string> => {
     const formData = new FormData();

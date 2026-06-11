@@ -49,7 +49,7 @@ Respond ONLY with a valid JSON object in this exact format:
 }`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-2.5-flash",
       contents: [{ text: systemPrompt }, { text: `User prompt: "${prompt}"` }],
     });
 
